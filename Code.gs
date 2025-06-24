@@ -9,7 +9,7 @@ function onOpen() {
 
 function showSidebar() {
   var html = HtmlService.createHtmlOutputFromFile('Sidebar')
-    .setTitle('Exa AI Dashboard');
+    .setTitle('Exa AI');
   SpreadsheetApp.getUi().showSidebar(html);
 }
 
@@ -19,13 +19,13 @@ function showAbout() {
                 'Version: 1.0.0\n\n' +
                 'This add-on provides powerful AI-driven search and analysis capabilities using the Exa API.\n\n' +
                 'Key Features:\n' +
-                '• EXA_ANSWER: Generate AI answers from web searches\n' +
-                '• EXA_SEARCH: Perform web searches\n' +
-                '• EXA_CONTENTS: Extract content from URLs\n' +
-                '• EXA_FINDSIMILAR: Find similar web pages\n\n' +
+                '- EXA_ANSWER: Generate AI answers from web searches\n' +
+                '- EXA_SEARCH: Perform web searches\n' +
+                '- EXA_CONTENTS: Extract content from URLs\n' +
+                '- EXA_FINDSIMILAR: Find similar web pages\n\n' +
                 'For detailed documentation and support, open the sidebar and navigate to the Docs tab.\n\n' +
                 'Visit https://exa.ai for more information about the Exa API.\n\n' +
-                'Visit https://github.com/BrandonGuocamole/exa-for-sheets the full project repository.';
+                'Visit https://github.com/exa-labs/exa-sheets the source code.';
   
   ui.alert('About Exa AI', message, ui.ButtonSet.OK);
 }
@@ -57,52 +57,43 @@ function saveAllApiKeys(keysData) {
 }
 
 /**
- * Saves a new API key with a name
- * @param {string} name A friendly name for the API key
+ * Saves a new API key (simplified version for the new UI)
  * @param {string} key The Exa API key to save
- * @param {boolean} setActive Whether to set this key as the active key
  * @return {Object} Status object with success flag and message
  */
-function saveApiKey(name, key, setActive = true) {
-  if (!name || !key) {
+function saveApiKey(key) {
+  if (!key) {
     return { 
       success: false, 
-      message: 'Both name and API key are required.'
+      message: 'API key is required.'
     };
   }
+  
+  // Use a default name since we're managing a single key
+  const name = "default";
   
   // Get all existing keys
   const keysData = getAllApiKeys();
   
-  // Check if a key with this name already exists
-  if (keysData.keys[name]) {
-    return { 
-      success: false, 
-      message: `A key named "${name}" already exists. Choose a different name.`
-    };
-  }
-  
-  // Add the new key with metadata
+  // Add or update the key with metadata
   const now = new Date().toISOString();
   keysData.keys[name] = {
     key: key,  // Store the actual API key
-    created: now,
+    created: keysData.keys[name] ? keysData.keys[name].created : now, // Keep original created date if updating
     lastUsed: now,
-    // First few and last few characters for display, rest is masked
-    displayKey: `${key.substring(0, 4)}...${key.substring(key.length - 4)}`
+    // First few and last few characters for display, rest is masked with more dots
+    displayKey: `${key.substring(0, 4)}${'.'.repeat(15)}${key.substring(key.length - 4)}`
   };
   
-  // Set as active key if requested or if it's the only key
-  if (setActive || !keysData.activeKeyName) {
-    keysData.activeKeyName = name;
-  }
+  // Set as active key
+  keysData.activeKeyName = name;
   
   // Save back to properties
   saveAllApiKeys(keysData);
   
   return { 
     success: true, 
-    message: `Key "${name}" saved successfully${setActive ? ' and set as active' : ''}.`
+    message: 'API key saved successfully.'
   };
 }
 
@@ -243,6 +234,39 @@ function getAllApiKeysForUI() {
   return result;
 }
 
+
+/**
+ * Simplified remove API key function for the new UI
+ * @return {Object} Status object with success flag and message
+ */
+function removeApiKey() {
+  // Clear all keys
+  PropertiesService.getUserProperties().deleteProperty('EXA_API_KEYS');
+  
+  return { 
+    success: true, 
+    message: 'API key removed successfully.'
+  };
+}
+
+/**
+ * Get API key info for the simplified UI
+ * @return {Object|null} Object with displayKey and created date, or null if no key
+ */
+function getApiKeyForUI() {
+  const keysData = getAllApiKeys();
+  
+  if (!keysData.activeKeyName || !keysData.keys[keysData.activeKeyName]) {
+    return null;
+  }
+  
+  const activeKey = keysData.keys[keysData.activeKeyName];
+  return {
+    displayKey: activeKey.displayKey,
+    created: activeKey.created
+  };
+}
+
 /**
  * Queries the Exa /answer endpoint to provide an AI-generated answer based on search results.
  * Allows adding prefix/suffix text and optionally includes source citations.
@@ -257,11 +281,11 @@ function getAllApiKeysForUI() {
  */
 function EXA_ANSWER(prompt, prefix, suffix, includeCitations) {
   const apiKey = getApiKey();
-  if (!apiKey) return "❌ No API key set. Please use 'Set API Key' in the menu.";
+  if (!apiKey) return "No API key set. Please set your API key in the Exa AI sidebar.";
 
   // --- Parameter Validation and Processing ---
   if (!prompt || typeof prompt !== 'string' || prompt.trim() === "") {
-    return "❌ Please provide a valid prompt/question.";
+    return "Please provide a valid prompt/question.";
   }
 
   const finalPrompt = `${prefix || ''} ${prompt} ${suffix || ''}`.trim();
@@ -328,12 +352,12 @@ function EXA_ANSWER(prompt, prefix, suffix, includeCitations) {
         return finalOutput; // Return the processed output
 
       } else {
-        return "❌ API returned a valid response, but no 'answer' field (string) was found.";
+        return "API returned a valid response, but no 'answer' field (string) was found.";
       }
     } else if (responseCode === 401) {
-      return "❌ API Error: Invalid API Key.";
+      return "API Error: Invalid API Key.";
     } else { // Handle other errors
-      let errorMessage = `❌ API Error: Status ${responseCode}.`;
+      let errorMessage = `API Error: Status ${responseCode}.`;
       try {
         const errorResult = JSON.parse(responseBody);
         errorMessage += ` Message: ${errorResult.error || responseBody}`;
@@ -344,7 +368,7 @@ function EXA_ANSWER(prompt, prefix, suffix, includeCitations) {
     }
   } catch (e) {
     Logger.log(`EXA_ANSWER Error: ${e} for prompt: ${finalPrompt}`);
-    return `❌ Script Error: ${e.message}`;
+    return `Script Error: ${e.message}`;
   }
 }
 
@@ -357,11 +381,11 @@ function EXA_ANSWER(prompt, prefix, suffix, includeCitations) {
  */
 function EXA_CONTENTS(url) {
   const apiKey = getApiKey();
-  if (!apiKey) return "❌ No API key set. Please use 'Set API Key' in the menu.";
+  if (!apiKey) return "No API key set. Please set your API key in the Exa AI sidebar.";
 
   // Basic URL validation
   if (!url || typeof url !== 'string' || !url.startsWith('http')) {
-      return "❌ Please provide a valid URL starting with http or https.";
+      return "Please provide a valid URL starting with http or https.";
   }
 
   try {
@@ -384,13 +408,13 @@ function EXA_CONTENTS(url) {
             // Prioritize text content based on Exa's common response structure
             return contentData.text || contentData.highlights || "No relevant content found in response.";
         } else {
-            return "❌ API returned successfully, but no content data found for this URL.";
+            return "API returned successfully, but no content data found for this URL.";
         }
     } else if (responseCode === 401) {
-        return "❌ API Error: Invalid API Key. Please check your key in the menu.";
+        return "API Error: Invalid API Key. Please check your key in the menu.";
     } else {
         // Try to parse error message from API if possible, otherwise return generic error
-        let errorMessage = `❌ API Error: Received status code ${responseCode}.`;
+        let errorMessage = `API Error: Received status code ${responseCode}.`;
         try {
             const errorResult = JSON.parse(responseBody);
             errorMessage += ` Message: ${errorResult.error || responseBody}`;
@@ -400,7 +424,7 @@ function EXA_CONTENTS(url) {
         return errorMessage;
     }
   } catch (e) {
-    return `❌ Script Error: ${e.message}`;
+    return `Script Error: ${e.message}`;
   }
 }
 
@@ -419,11 +443,11 @@ function EXA_CONTENTS(url) {
  */
 function EXA_FINDSIMILAR(url, numResults, includeDomainsStr, excludeDomainsStr, includeTextStr, excludeTextStr) {
   const apiKey = getApiKey();
-  if (!apiKey) return [["❌ No API key set. Please use 'Set API Key' in the menu."]];
+  if (!apiKey) return [["No API key set. Please set your API key in the Exa AI sidebar."]];
 
   // --- Parameter Validation and Processing ---
   if (!url || typeof url !== 'string' || !url.startsWith('http')) {
-    return [["❌ Please provide a valid URL starting with http or https."]];
+    return [["Please provide a valid URL starting with http or https."]];
   }
 
   // Validate and set numResults (sensible default and limits)
@@ -487,13 +511,13 @@ function EXA_FINDSIMILAR(url, numResults, includeDomainsStr, excludeDomainsStr, 
       if (result && result.results && result.results.length > 0) {
         return result.results.map(item => [item.url || "N/A"]); // Map URLs, provide fallback
       } else {
-        return [["✅ No similar URLs found matching the criteria."]];
+        return [["No similar URLs found matching the criteria."]];
       }
     } else if (responseCode === 401) {
-      return [["❌ API Error: Invalid API Key."]];
+      return [["API Error: Invalid API Key."]];
     } else if (responseCode === 400) {
         // Handle potential bad request errors (e.g., invalid filters)
-        let errorMessage = `❌ API Error (Bad Request): Status ${responseCode}.`;
+        let errorMessage = `API Error (Bad Request): Status ${responseCode}.`;
         try {
             const errorResult = JSON.parse(responseBody);
             errorMessage += ` Message: ${errorResult.error || responseBody}`;
@@ -503,7 +527,7 @@ function EXA_FINDSIMILAR(url, numResults, includeDomainsStr, excludeDomainsStr, 
         return [[errorMessage]];
     }
     else { // Handle other errors
-      let errorMessage = `❌ API Error: Status ${responseCode}.`;
+      let errorMessage = `API Error: Status ${responseCode}.`;
       try {
         const errorResult = JSON.parse(responseBody);
         errorMessage += ` Message: ${errorResult.error || responseBody}`;
@@ -515,7 +539,7 @@ function EXA_FINDSIMILAR(url, numResults, includeDomainsStr, excludeDomainsStr, 
   } catch (e) {
     // Catch script execution errors (e.g., network issues)
     Logger.log(`EXA_FINDSIMILAR Error: ${e} for payload: ${JSON.stringify(payload)}`); // Log for debugging
-    return [[`❌ Script Error: ${e.message}`]];
+    return [[`Script Error: ${e.message}`]];
   }
 }
 
@@ -533,10 +557,10 @@ function EXA_FINDSIMILAR(url, numResults, includeDomainsStr, excludeDomainsStr, 
  */
 function EXA_SEARCH(query, numResults, searchType, prefix, suffix) {
   const apiKey = getApiKey();
-  if (!apiKey) return [["❌ No API key set. Please use 'Set API Key' in the menu."]];
+  if (!apiKey) return [["No API key set. Please set your API key in the Exa AI sidebar."]];
 
-  if (!query || typeof query !== 'string') {
-    return [["❌ Please provide a valid search query."]];
+  if (!query || typeof query !== 'string' || query.trim() === "") {
+    return [["Please provide a valid search query."]];
   }
 
   // Process the query with optional prefix and suffix
@@ -568,12 +592,12 @@ function EXA_SEARCH(query, numResults, searchType, prefix, suffix) {
         // Map results to a 2D array for vertical spill
         return result.results.map(item => [item.url]);
       } else {
-        return [["✅ API returned successfully, but no search results found."]];
+        return [["API returned successfully, but no search results found."]];
       }
     } else if (responseCode === 401) {
       return [["❌ API Error: Invalid API Key. Please check your key in the menu."]];
     } else {
-      let errorMessage = `❌ API Error: Status ${responseCode}.`;
+      let errorMessage = `API Error: Status ${responseCode}.`;
       try {
         const errorResult = JSON.parse(responseBody);
         errorMessage += ` Message: ${errorResult.error || responseBody}`;
@@ -583,79 +607,7 @@ function EXA_SEARCH(query, numResults, searchType, prefix, suffix) {
       return [[errorMessage]];
     }
   } catch (e) {
-    return [[`❌ Script Error: ${e.message}`]];
-  }
-}
-
-/**
- * Backend function called by the sidebar's Function Builder to test an EXA function.
- *
- * @param {string} functionName The name of the EXA function to test (e.g., "EXA_ANSWER").
- * @param {object} args An object containing the arguments for the function, keyed by parameter name (e.g., { prompt: "Test prompt", includeCitations: false }).
- * @return {any} The result from the called EXA function, or an error string.
- */
-function testExaFunction(functionName, args) {
-  Logger.log(`testExaFunction called with: ${functionName}, Args: ${JSON.stringify(args)}`);
-
-  // Ensure API key exists before proceeding
-  const apiKey = getApiKey();
-  if (!apiKey) return "❌ No API key set. Please use 'Set API Key' in the menu.";
-
-  try {
-    switch (functionName) {
-      case "EXA_ANSWER":
-        if (!args || typeof args.prompt !== 'string' || args.prompt.trim() === "") {
-          return "❌ Missing required argument: prompt";
-        }
-        // Call EXA_ANSWER with arguments from the args object
-        return EXA_ANSWER(
-          args.prompt,
-          args.prefix || "", // Default optional args to empty string or expected default
-          args.suffix || "",
-          args.includeCitations || false
-        );
-
-      case "EXA_CONTENTS":
-        if (!args || typeof args.url !== 'string' || !args.url.startsWith('http')) {
-           return "❌ Missing or invalid required argument: url (must start with http/https)";
-        }
-        // Call EXA_CONTENTS
-        return EXA_CONTENTS(args.url);
-
-      case "EXA_FINDSIMILAR":
-        if (!args || typeof args.url !== 'string' || !args.url.startsWith('http')) {
-          return [["❌ Missing or invalid required argument: url (must start with http/https)"]]; // Return as array for consistency
-        }
-        // Call EXA_FINDSIMILAR, passing potentially null values for optional args
-        return EXA_FINDSIMILAR(
-          args.url,
-          args.numResults, // EXA_FINDSIMILAR handles undefined/null internally
-          args.includeDomainsStr,
-          args.excludeDomainsStr,
-          args.includeTextStr,
-          args.excludeTextStr
-        );
-
-       case "EXA_SEARCH":
-         if (!args || typeof args.query !== 'string' || args.query.trim() === "") {
-            return [["❌ Missing required argument: query"]]; // Return as array for consistency
-         }
-         // Call EXA_SEARCH
-         return EXA_SEARCH(
-           args.query,
-           args.numResults, // EXA_SEARCH handles undefined/null internally
-           args.searchType,
-           args.prefix,
-           args.suffix
-         );
-
-      default:
-        return `❌ Unknown function: ${functionName}`;
-    }
-  } catch (e) {
-    Logger.log(`Error in testExaFunction (${functionName}): ${e} - Args: ${JSON.stringify(args)}`);
-    // Return a user-friendly script error message
-    return `❌ Script Error during test: ${e.message}`;
+    return [[`Script Error: ${e.message}`]];
   }
 }
 
@@ -723,11 +675,12 @@ function processBatchOperation(operation) {
     // Generate result message
     let message;
     if (exaCellsAffected === 0) {
-      message = `No Exa functions found in the ${totalProcessed} selected cell(s).`;
+      const cellText = totalProcessed === 1 ? 'cell' : 'cells';
+      message = `No Exa functions found in the ${totalProcessed} selected ${cellText}.`;
       return { success: false, message: message };
     } else {
-      const actionText = operation === 'refresh' ? 'refreshed' : 'cleared';
-      message = `Successfully ${actionText} ${exaCellsAffected} cell(s) with Exa functions.`;
+      const cellText = exaCellsAffected === 1 ? 'cell' : 'cells';
+      message = `Successfully refreshed ${exaCellsAffected} ${cellText}.`;
       return { success: true, message: message };
     }
     

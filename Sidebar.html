@@ -7,7 +7,6 @@
       body {
         font-family: Verdana, Geneva, sans-serif;
         padding: 0; /* Remove body padding, handle spacing inside containers */
-        background-color: #F7F3EA; /* Lighter sand color */
         color: #111827; /* Exa text color */
         margin: 0;
         height: 100vh; /* Ensure body takes full height */
@@ -23,36 +22,19 @@
       .tab-container {
         display: flex;
         border-bottom: 1px solid #D1D5DB;
-        background-color: #EFE8D9; /* Warmer background for tabs */
         padding: 0 15px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05); /* Subtle shadow for depth */
-        position: relative; /* For shadow positioning */
-        z-index: 10; /* Ensure shadow appears above content */
       }
 
-      .tab-button {
-        padding: 10px 15px;
-        cursor: pointer;
-        border: none;
-        background-color: transparent;
-        border-bottom: 3px solid transparent; /* Space for active indicator */
-        margin-bottom: -1px; /* Overlap border */
-        font-weight: 500;
-        color: #6B7280; /* Gray for inactive */
-        font-size: 0.9em;
-        transition: all 0.2s ease;
-      }
 
       .tab-button.active {
-        color: #1F40ED; /* Exa accent blue for active */
-        border-bottom-color: #1F40ED;
+        color: #1F40ED;
         font-weight: 600;
-        background-color: #F7F3EA; /* Match body background */
+        border-bottom-color: #1F40ED;
       }
 
       .tab-button:hover:not(.active) {
-        background-color: #E6DFC7; /* Distinct hover color */
-        color: #4B5563; /* Darker gray on hover */
+        color: #374151;
+        background-color: transparent;
       }
 
        .tab-content {
@@ -95,7 +77,6 @@
         border-color: #1F40ED; /* Exa accent on focus */
         outline: none; /* Remove default outline */
         box-shadow: 0 0 0 2px rgba(31, 64, 237, 0.2); /* Subtle glow */
-        background-color: #FCFBF7; /* Very subtle cream background when focused */
        }
       button {
         padding: 10px 18px;
@@ -111,8 +92,19 @@
         font-family: Verdana, Geneva, sans-serif;
         letter-spacing: 0.3px; /* Slightly improve button text readability */
       }
-      button:hover:not(:disabled) {
-        background-color: #1a35c4; /* Slightly darker blue on hover */
+      
+      .tab-button {
+        padding: 12px 20px;
+        cursor: pointer;
+        border: none;
+        background-color: transparent;
+        font-weight: 500;
+        color: #6B7280;
+        font-size: 0.9em;
+        transition: color 0.2s ease;
+        border-bottom: 2px solid transparent;
+        margin-bottom: -1px;
+        border-radius: 0;
       }
        button:disabled {
         background-color: #9CA3AF; /* Grey out when disabled */
@@ -123,7 +115,6 @@
         font-size: 0.9em;
         min-height: 1.2em; /* Reserve space */
         padding: 10px;
-        background-color: #F3F4F6;
         border-radius: 4px;
         border: 1px solid #E5E7EB;
         word-wrap: break-word; /* Wrap long results */
@@ -169,24 +160,8 @@
           font-size: 0.9em;
         }
 
-      /* Builder specific styles */
-      #builderForm label {
-        margin-top: 10px; /* Space above labels in the builder */
-        font-family: Verdana, Geneva, sans-serif;
-      }
-       #testResult {
-         margin-top: 20px;
-         min-height: 50px; /* More space for results */
-       }
 
       /* Batch operations styles */
-      .description {
-        font-family: Verdana, Geneva, sans-serif;
-        font-size: 0.85em;
-        margin-bottom: 15px;
-        color: #4B5563;
-      }
-      
       .batch-buttons {
         display: flex;
         flex-direction: column;
@@ -200,7 +175,6 @@
       .status-display {
         margin-top: 20px;
         padding: 12px;
-        background-color: #F7F3EA; /* Match body but slightly darker */
         border-radius: 6px;
         border: 1px solid #E5E7EB;
         font-size: 0.9em;
@@ -232,8 +206,6 @@
       }
 
       .key-info {
-        border-left: 3px solid #1F40ED;
-        padding-left: 12px;
         margin: 10px 0;
       }
 
@@ -348,75 +320,56 @@
 
     <div class="tab-container">
       <button class="tab-button active" onclick="openTab(event, 'apiKeyTab')">API Key</button>
-      <button class="tab-button" onclick="openTab(event, 'docsTab')">Docs</button>
-      <button class="tab-button" onclick="openTab(event, 'builderTab')">Builder</button>
       <button class="tab-button" onclick="openTab(event, 'batchTab')">Batch</button>
+      <button class="tab-button" onclick="openTab(event, 'docsTab')">Docs</button>
     </div>
 
     <!-- API Key Tab -->
     <div id="apiKeyTab" class="tab-content active">
-      <h3>🔑 API Key Management</h3>
+      <h3>API Key</h3>
       
-      <!-- Active Key Section -->
-      <div id="activeKeySection" class="key-section">
-        <h4>Active API Key</h4>
-        <div id="noActiveKey" class="no-key-message">
-          <p>No active API key set. Add a key below to get started.</p>
-        </div>
-        <div id="activeKeyInfo" class="key-info" style="display: none;">
+      <!-- Key Display Section -->
+      <div id="keyDisplaySection" class="key-section" style="display: none;">
+        <div class="key-info">
           <div class="key-row">
-            <span class="key-label">Name:</span>
-            <span id="activeKeyName" class="key-value"></span>
+            <span id="activeKeyDisplay" class="key-value key-masked" style="display: block; margin-bottom: 10px; font-size: 1.1em; background-color: #F3F4F6; padding: 8px 12px; border-radius: 6px; width: 100%; box-sizing: border-box;"></span>
           </div>
           <div class="key-row">
-            <span class="key-label">Key:</span>
-            <span id="activeKeyDisplay" class="key-value key-masked"></span>
-          </div>
-          <div class="key-row">
-            <span class="key-label">Created:</span>
-            <span id="activeKeyCreated" class="key-value date-display"></span>
-          </div>
-          <div class="key-row">
-            <span class="key-label">Last Used:</span>
-            <span id="activeKeyLastUsed" class="key-value date-display"></span>
+            <span id="activeKeyCreated" class="date-display" style="font-size: 0.85em; color: #6B7280;"></span>
           </div>
         </div>
+        <button id="removeButton" onclick="removeKey()" class="delete-button">Remove</button>
       </div>
       
-      <!-- Key List Section -->
-      <div id="keysListSection" class="key-section">
-        <h4>Saved API Keys</h4>
-        <div id="keysList" class="keys-list">
-          <!-- Key items will be added here dynamically -->
-          <div id="noSavedKeys" class="no-key-message">
-            <p>No saved API keys found.</p>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Add New Key Section -->
+      <!-- Add Key Section -->
       <div id="addKeySection" class="key-section">
-        <h4>Add New API Key</h4>
-        <label for="keyName">Name:</label>
-        <input type="text" id="keyName" placeholder="Enter a name for this API key">
-        
         <label for="apiKey">API Key:</label>
         <input type="password" id="apiKey" placeholder="Paste your Exa API key here">
-        
-        <div class="checkbox-container">
-          <input type="checkbox" id="setAsActive" checked>
-          <label for="setAsActive" class="checkbox-label">Set as active key</label>
-        </div>
         
         <button id="saveButton" onclick="saveKey()">Save API Key</button>
       </div>
       
-      <div id="status" class="status-display"></div>
+      <div id="apiKeyStatus" class="status-display">
+        <span id="apiKeyStatusText">No API key set. Add a key to get started.</span>
+      </div>
+    </div>
+
+    <!-- Batch Operations Tab -->
+    <div id="batchTab" class="tab-content">
+      <h3>Batch Refresh</h3>
+      
+      <div class="batch-buttons">
+        <button id="refreshSelected" onclick="performBatchOperation('refresh')">Refresh Selected Cells</button>
+      </div>
+      
+      <div id="batchStatus" class="status-display">
+        Select cells containing Exa functions and click refresh.
+      </div>
     </div>
 
     <!-- Documentation Tab -->
     <div id="docsTab" class="tab-content">
-      <h3>📖 Function Documentation</h3>
+      <h3>Documentation</h3>
 
       <div class="doc-section">
         <h4>EXA_ANSWER</h4>
@@ -438,6 +391,18 @@
       </div>
 
       <div class="doc-section">
+        <h4>EXA_SEARCH</h4>
+        <p>Searches the web using the Exa /search endpoint.</p>
+        <p><strong>Parameters:</strong></p>
+        <p><code>query</code> (string, required): The search query.</p>
+        <p><code>numResults</code> (number, optional): Max results (1-10). Defaults to 1.</p>
+        <p><code>searchType</code> (string, optional): 'auto', 'neural', or 'keyword'. Defaults to 'auto'.</p>
+        <p><code>prefix</code> (string, optional): Text added before the query.</p>
+        <p><code>suffix</code> (string, optional): Text added after the query.</p>
+        <p><strong>Returns:</strong> A vertical list of result URLs.</p>
+      </div>
+
+      <div class="doc-section">
         <h4>EXA_FINDSIMILAR</h4>
         <p>Finds URLs similar to the input URL using Exa /findSimilar.</p>
         <p><strong>Parameters:</strong></p>
@@ -449,66 +414,14 @@
         <p><code>excludeTextStr</code> (string, optional): Phrase that MUST NOT be in results.</p>
         <p><strong>Returns:</strong> A vertical list of similar URLs.</p>
       </div>
-
-      <div class="doc-section">
-        <h4>EXA_SEARCH</h4>
-        <p>Searches the web using the Exa /search endpoint.</p>
-        <p><strong>Parameters:</strong></p>
-        <p><code>query</code> (string, required): The search query.</p>
-        <p><code>numResults</code> (number, optional): Max results (1-10). Defaults to 1.</p>
-        <p><code>searchType</code> (string, optional): 'auto', 'neural', or 'keyword'. Defaults to 'auto'.</p>
-        <p><code>prefix</code> (string, optional): Text added before the query.</p>
-        <p><code>suffix</code> (string, optional): Text added after the query.</p>
-        <p><strong>Returns:</strong> A vertical list of result URLs.</p>
-      </div>
-    </div>
-
-    <!-- Function Builder Tab -->
-    <div id="builderTab" class="tab-content">
-      <h3>⚙️ Function Builder</h3>
-        <form id="builderForm">
-            <label for="functionSelect">Select Function:</label>
-            <select id="functionSelect" onchange="updateBuilderForm()">
-                <option value="">-- Select --</option>
-                <option value="EXA_ANSWER">EXA_ANSWER</option>
-                <option value="EXA_CONTENTS">EXA_CONTENTS</option>
-                <option value="EXA_FINDSIMILAR">EXA_FINDSIMILAR</option>
-                <option value="EXA_SEARCH">EXA_SEARCH</option>
-            </select>
-
-            <div id="builderInputs">
-                <!-- Input fields will be dynamically added here -->
-            </div>
-
-            <button type="button" id="testButton" onclick="testFunction()" disabled>Test Function</button>
-        </form>
-        <div id="testResult">Test results will appear here...</div>
-    </div>
-
-    <!-- Batch Operations Tab -->
-    <div id="batchTab" class="tab-content">
-      <h3>🔄 Batch Operations</h3>
-      <p class="description">Perform operations on selected cells containing Exa functions.</p>
-      
-      <div class="batch-buttons">
-        <button id="refreshSelected" onclick="performBatchOperation('refresh')">Refresh Selected Cells</button>
-        <button id="clearSelected" onclick="performBatchOperation('clear')">Clear Selected Results</button>
-      </div>
-      
-      <div id="batchStatus" class="status-display">
-        Select cells containing Exa functions and choose an operation.
-      </div>
     </div>
 
 
     <script>
       const apiKeyInput = document.getElementById('apiKey');
       const saveButton = document.getElementById('saveButton');
-      const statusDiv = document.getElementById('status');
-      const functionSelect = document.getElementById('functionSelect');
-      const builderInputsDiv = document.getElementById('builderInputs');
-      const testButton = document.getElementById('testButton');
-      const testResultDiv = document.getElementById('testResult');
+      const statusDiv = document.getElementById('apiKeyStatus');
+      const statusText = document.getElementById('apiKeyStatusText');
 
       // --- Tab Management ---
       function openTab(evt, tabName) {
@@ -526,17 +439,6 @@
         document.getElementById(tabName).classList.add("active");
         evt.currentTarget.classList.add("active");
 
-        // Reset builder form when switching away or to the builder tab
-        if (tabName === 'builderTab') {
-            updateBuilderForm(); // Ensure form matches selection
-        } else {
-            // Optional: clear builder form/results when switching away
-            // functionSelect.value = "";
-            // builderInputsDiv.innerHTML = "";
-            // testResultDiv.textContent = "Test results will appear here...";
-            // testResultDiv.className = '';
-            // testButton.disabled = true;
-        }
       }
 
       // Initialize the first tab
@@ -545,104 +447,71 @@
       });
 
 
-      // --- API Key Saving ---
+      // --- API Key Management ---
       function saveKey() {
-        const keyName = document.getElementById('keyName').value.trim();
         const key = apiKeyInput.value.trim();
-        const setAsActive = document.getElementById('setAsActive').checked;
-        
-        if (!keyName) {
-            statusDiv.className = 'error';
-            statusDiv.textContent = 'Please enter a name for the API key.';
-            return;
-        }
         
         if (!key) {
-            statusDiv.className = 'error';
-            statusDiv.textContent = 'Please enter an API key.';
+            statusText.textContent = 'Please enter an API key.';
+            statusDiv.style.display = 'block';
             return;
         }
 
         saveButton.disabled = true;
-        statusDiv.className = ''; // Clear previous status styles
-        statusDiv.textContent = 'Saving...';
+        statusText.textContent = 'Saving...';
+        statusDiv.style.display = 'block';
 
         google.script.run
           .withSuccessHandler((result) => {
             if (result.success) {
               // Clear form inputs
-              document.getElementById('keyName').value = '';
               apiKeyInput.value = '';
               
               // Show success message
-              statusDiv.className = 'success';
-              statusDiv.textContent = result.message;
+              statusText.textContent = `${result.message}`;
               
               // Refresh the API key display
-              loadApiKeys();
+              loadApiKey();
             } else {
               // Show error message
-              statusDiv.className = 'error';
-              statusDiv.textContent = result.message;
+              statusText.textContent = `${result.message}`;
             }
             saveButton.disabled = false;
           })
           .withFailureHandler((error) => {
-            statusDiv.className = 'error';
-            statusDiv.textContent = `❌ Error: ${error.message || error}`;
+            statusText.textContent = `Error: ${error.message || error}`;
+            statusDiv.style.display = 'block';
             console.error("Save API Key Error:", error);
             saveButton.disabled = false;
           })
-          .saveApiKey(keyName, key, setAsActive);
+          .saveApiKey(key);
       }
-
-      // Delete API key
-      function deleteKey(keyName) {
-        if (!confirm(`Are you sure you want to delete the key "${keyName}"?`)) {
+      
+      // Remove API key
+      function removeKey() {
+        if (!confirm('Are you sure you want to remove the API key?')) {
           return;
         }
         
-        statusDiv.className = '';
-        statusDiv.textContent = 'Deleting...';
+        statusText.textContent = 'Removing...';
+        statusDiv.style.display = 'block';
         
         google.script.run
           .withSuccessHandler((result) => {
-            statusDiv.className = result.success ? 'success' : 'error';
-            statusDiv.textContent = result.message;
+            statusText.textContent = result.success ? `${result.message}` : `${result.message}`;
             
             if (result.success) {
-              loadApiKeys(); // Refresh the key list
+              loadApiKey(); // Refresh the display
             }
           })
           .withFailureHandler((error) => {
-            statusDiv.className = 'error';
-            statusDiv.textContent = `❌ Error: ${error.message || error}`;
-            console.error("Delete API Key Error:", error);
+            statusText.textContent = `Error: ${error.message || error}`;
+            statusDiv.style.display = 'block';
+            console.error("Remove API Key Error:", error);
           })
-          .deleteApiKey(keyName);
+          .removeApiKey();
       }
-      
-      // Set active API key
-      function setActiveKey(keyName) {
-        statusDiv.className = '';
-        statusDiv.textContent = 'Setting active key...';
-        
-        google.script.run
-          .withSuccessHandler((result) => {
-            statusDiv.className = result.success ? 'success' : 'error';
-            statusDiv.textContent = result.message;
-            
-            if (result.success) {
-              loadApiKeys(); // Refresh the key list
-            }
-          })
-          .withFailureHandler((error) => {
-            statusDiv.className = 'error';
-            statusDiv.textContent = `❌ Error: ${error.message || error}`;
-            console.error("Set Active Key Error:", error);
-          })
-          .setActiveApiKey(keyName);
-      }
+
       
       // Format date for display
       function formatDate(isoDateString) {
@@ -654,118 +523,54 @@
           // If date is today, show time only
           const today = new Date();
           if (date.toDateString() === today.toDateString()) {
-            return `Today at ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+            return `Created today at ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
           }
           
           // If date is yesterday
           const yesterday = new Date(today);
           yesterday.setDate(yesterday.getDate() - 1);
           if (date.toDateString() === yesterday.toDateString()) {
-            return `Yesterday at ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+            return `Created yesterday at ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
           }
           
           // Otherwise show date and time
-          return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          return `Created ${date.toLocaleDateString()} at ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
         } catch (e) {
           return 'Invalid date';
         }
       }
       
-      // Load and display all API keys
-      function loadApiKeys() {
-        // Clear existing keys list except the "no keys" message
-        const keysList = document.getElementById('keysList');
-        const noSavedKeys = document.getElementById('noSavedKeys');
-        
-        // Remove all child elements except the no keys message
-        Array.from(keysList.children).forEach(child => {
-          if (child !== noSavedKeys) {
-            keysList.removeChild(child);
-          }
-        });
-        
-        // Get active key info and all keys
+      // Load and display API key
+      function loadApiKey() {
         google.script.run
-          .withSuccessHandler((keysData) => {
-            // Display active key info
-            const activeKeyInfo = document.getElementById('activeKeyInfo');
-            const noActiveKey = document.getElementById('noActiveKey');
+          .withSuccessHandler((keyData) => {
+            const keyDisplaySection = document.getElementById('keyDisplaySection');
+            const addKeySection = document.getElementById('addKeySection');
+            const apiKeyStatus = document.getElementById('apiKeyStatus');
+            const apiKeyStatusText = document.getElementById('apiKeyStatusText');
             
-            if (keysData.activeKey) {
-              // Active key exists
-              noActiveKey.style.display = 'none';
-              activeKeyInfo.style.display = 'block';
+            if (keyData) {
+              // Key exists - show display section, hide add section and status
+              keyDisplaySection.style.display = 'block';
+              addKeySection.style.display = 'none';
+              apiKeyStatus.style.display = 'none';
               
-              document.getElementById('activeKeyName').textContent = keysData.activeKey.name;
-              document.getElementById('activeKeyDisplay').textContent = keysData.activeKey.displayKey;
-              document.getElementById('activeKeyCreated').textContent = formatDate(keysData.activeKey.created);
-              document.getElementById('activeKeyLastUsed').textContent = formatDate(keysData.activeKey.lastUsed);
+              document.getElementById('activeKeyDisplay').textContent = keyData.displayKey;
+              document.getElementById('activeKeyCreated').textContent = formatDate(keyData.created);
             } else {
-              // No active key
-              noActiveKey.style.display = 'block';
-              activeKeyInfo.style.display = 'none';
-            }
-            
-            // Display saved keys
-            if (keysData.keys && Object.keys(keysData.keys).length > 0) {
-              noSavedKeys.style.display = 'none';
-              
-              // Create an item for each key
-              Object.entries(keysData.keys).forEach(([name, keyData]) => {
-                const isActive = keysData.activeKey && keysData.activeKey.name === name;
-                const keyItem = document.createElement('div');
-                keyItem.className = `key-item${isActive ? ' active' : ''}`;
-                
-                // Create key info section
-                const keyInfo = document.createElement('div');
-                keyInfo.className = 'key-item-info';
-                
-                const keyName = document.createElement('div');
-                keyName.className = 'key-item-name';
-                keyName.textContent = name + (isActive ? ' (Active)' : '');
-                
-                const keyDisplay = document.createElement('div');
-                keyDisplay.className = 'key-item-display';
-                keyDisplay.textContent = keyData.displayKey;
-                
-                keyInfo.appendChild(keyName);
-                keyInfo.appendChild(keyDisplay);
-                
-                // Create key actions section
-                const keyActions = document.createElement('div');
-                keyActions.className = 'key-item-actions';
-                
-                if (!isActive) {
-                  const setActiveBtn = document.createElement('button');
-                  setActiveBtn.className = 'key-action-button set-active-button';
-                  setActiveBtn.textContent = 'Set Active';
-                  setActiveBtn.onclick = () => setActiveKey(name);
-                  keyActions.appendChild(setActiveBtn);
-                }
-                
-                const deleteBtn = document.createElement('button');
-                deleteBtn.className = 'key-action-button delete-button';
-                deleteBtn.textContent = 'Delete';
-                deleteBtn.onclick = () => deleteKey(name);
-                keyActions.appendChild(deleteBtn);
-                
-                // Add info and actions to item
-                keyItem.appendChild(keyInfo);
-                keyItem.appendChild(keyActions);
-                
-                // Add item to list
-                keysList.appendChild(keyItem);
-              });
-            } else {
-              noSavedKeys.style.display = 'block';
+              // No key - show add section and status, hide display section
+              keyDisplaySection.style.display = 'none';
+              addKeySection.style.display = 'block';
+              apiKeyStatus.style.display = 'block';
+              apiKeyStatusText.textContent = 'No API key set. Add a key to get started.';
             }
           })
           .withFailureHandler((error) => {
-            console.error("Load API Keys Error:", error);
-            statusDiv.className = 'error';
-            statusDiv.textContent = `❌ Error loading API keys: ${error.message || error}`;
+            console.error("Load API Key Error:", error);
+            statusText.textContent = `Error loading API key: ${error.message || error}`;
+            statusDiv.style.display = 'block';
           })
-          .getAllApiKeysForUI();
+          .getApiKeyForUI();
       }
       
       apiKeyInput.addEventListener('keypress', function(event) {
@@ -775,233 +580,37 @@
         }
       });
       
-      // Load API keys when the tab is shown
+      // Load API key when the tab is shown
       document.addEventListener('DOMContentLoaded', () => {
-        loadApiKeys();
+        loadApiKey();
       });
-
-      // --- Function Builder Logic ---
-      const functionParams = {
-          EXA_ANSWER: [
-              { name: 'prompt', type: 'text', required: true, label: 'Prompt (Required)' },
-              { name: 'prefix', type: 'text', required: false, label: 'Prefix (Optional)' },
-              { name: 'suffix', type: 'text', required: false, label: 'Suffix (Optional)' },
-              { name: 'includeCitations', type: 'checkbox', required: false, label: 'Include Citations (Default: False)' }
-          ],
-          EXA_CONTENTS: [
-              { name: 'url', type: 'text', required: true, label: 'URL (Required, e.g., https://example.com)' }
-          ],
-          EXA_FINDSIMILAR: [
-              { name: 'url', type: 'text', required: true, label: 'URL (Required, e.g., https://example.com)' },
-              { name: 'numResults', type: 'number', required: false, label: 'Num Results (Optional, 1-10, Default: 5)', min: 1, max: 10, default: 5 },
-              { name: 'includeDomainsStr', type: 'text', required: false, label: 'Include Domains (Optional, comma-separated)' },
-              { name: 'excludeDomainsStr', type: 'text', required: false, label: 'Exclude Domains (Optional, comma-separated)' },
-              { name: 'includeTextStr', type: 'text', required: false, label: 'Include Text (Optional phrase)' },
-              { name: 'excludeTextStr', type: 'text', required: false, label: 'Exclude Text (Optional phrase)' }
-          ],
-          EXA_SEARCH: [
-              { name: 'query', type: 'text', required: true, label: 'Search Query (Required)' },
-              { name: 'numResults', type: 'number', required: false, label: 'Num Results (Optional, 1-10, Default: 5)', min: 1, max: 10, default: 5 },
-              { name: 'searchType', type: 'select', required: false, label: 'Search Type (Optional, Default: auto)', options: ['auto', 'neural', 'keyword'], default: 'auto' },
-              { name: 'prefix', type: 'text', required: false, label: 'Prefix (Optional)' },
-              { name: 'suffix', type: 'text', required: false, label: 'Suffix (Optional)' }
-          ]
-      };
-
-      function updateBuilderForm() {
-          const selectedFunction = functionSelect.value;
-          builderInputsDiv.innerHTML = ''; // Clear previous inputs
-          testButton.disabled = true; // Disable button until function selected
-          testResultDiv.textContent = 'Test results will appear here...';
-          testResultDiv.className = ''; // Clear result styling
-
-          if (selectedFunction && functionParams[selectedFunction]) {
-              const params = functionParams[selectedFunction];
-              params.forEach(param => {
-                  const label = document.createElement('label');
-                  label.htmlFor = `param-${param.name}`;
-                  label.textContent = param.label || param.name;
-
-                  let input;
-                  if (param.type === 'checkbox') {
-                      input = document.createElement('input');
-                      input.type = 'checkbox';
-                      input.id = `param-${param.name}`;
-                      input.name = param.name;
-                      // Checkboxes need different layout, maybe place label after
-                      const container = document.createElement('div');
-                      container.style.display = 'flex';
-                      container.style.alignItems = 'center';
-                      container.style.marginBottom = '15px';
-                      input.style.width = 'auto'; // Don't force full width
-                      input.style.marginRight = '8px';
-                      label.style.marginBottom = '0'; // Remove bottom margin for inline label
-                      label.style.fontWeight = 'normal'; // Normal weight for checkbox label
-                      container.appendChild(input);
-                      container.appendChild(label);
-                      builderInputsDiv.appendChild(container);
-                  } else if (param.type === 'select') {
-                      input = document.createElement('select');
-                      input.id = `param-${param.name}`;
-                      input.name = param.name;
-                      if (param.options) {
-                        // Add default/placeholder option? Maybe not needed if default is set
-                        param.options.forEach(opt => {
-                             const option = document.createElement('option');
-                             option.value = opt;
-                             option.textContent = opt;
-                             if (opt === param.default) {
-                                 option.selected = true;
-                             }
-                             input.appendChild(option);
-                        });
-                      }
-                      builderInputsDiv.appendChild(label);
-                      builderInputsDiv.appendChild(input);
-
-                  } else { // text, number, etc.
-                      input = document.createElement('input');
-                      input.type = param.type;
-                      input.id = `param-${param.name}`;
-                      input.name = param.name;
-                      if (param.required) {
-                          // input.required = true; // HTML5 validation, but we'll handle in JS
-                          label.textContent += ' *'; // Indicate required
-                      }
-                      if (param.type === 'number') {
-                          if (param.min !== undefined) input.min = param.min;
-                          if (param.max !== undefined) input.max = param.max;
-                      }
-                      if (param.default !== undefined) {
-                          input.placeholder = `Default: ${param.default}`;
-                      }
-                       builderInputsDiv.appendChild(label);
-                       builderInputsDiv.appendChild(input);
-                  }
-
-              });
-              testButton.disabled = false; // Enable test button
-          }
-      }
-
-      function testFunction() {
-          const selectedFunction = functionSelect.value;
-          if (!selectedFunction) return;
-
-          const paramsConfig = functionParams[selectedFunction];
-          const args = {};
-          let missingRequired = false;
-
-          // Collect arguments from form
-          paramsConfig.forEach(param => {
-              const inputElement = document.getElementById(`param-${param.name}`);
-              if (inputElement) {
-                  let value;
-                  if (param.type === 'checkbox') {
-                      value = inputElement.checked;
-                  } else if (param.type === 'number') {
-                      value = inputElement.value === '' ? undefined : parseFloat(inputElement.value);
-                      // Basic validation for number range
-                      if (value !== undefined) {
-                          if (param.min !== undefined && value < param.min) value = param.min;
-                          if (param.max !== undefined && value > param.max) value = param.max;
-                          inputElement.value = value; // Update input field if clamped
-                      }
-                  } else { // text, select
-                      value = inputElement.value.trim();
-                  }
-
-                  // Handle empty strings for non-required fields vs. required fields
-                  if (value === '' && param.type !== 'checkbox' && !param.required) {
-                     // Treat empty optional strings/numbers as "not provided" (pass null/undefined)
-                     args[param.name] = null; // Or maybe just don't add to args? Depends on backend handler. Let's pass null.
-                  } else if (value === '' && param.type !== 'checkbox' && param.required) {
-                     missingRequired = true;
-                     // Highlight missing field (optional)
-                     inputElement.style.borderColor = '#DC2626';
-                  }
-                   else {
-                     args[param.name] = value;
-                     // Reset border color if previously marked as error
-                     if (inputElement.style) inputElement.style.borderColor = '#D1D5DB';
-                  }
-              } else if (param.required) {
-                  missingRequired = true; // Should not happen if form generation is correct
-              }
-          });
-
-          if (missingRequired) {
-              testResultDiv.className = 'error';
-              testResultDiv.textContent = '❌ Please fill in all required fields (*).';
-              return;
-          }
-
-          testButton.disabled = true;
-          testResultDiv.className = '';
-          testResultDiv.textContent = 'Testing...';
-
-          console.log("Calling testExaFunction with:", selectedFunction, args); // Debug log
-
-          google.script.run
-              .withSuccessHandler(result => {
-                  console.log("Test Result:", result);
-                  testResultDiv.className = 'success'; // Assume success unless result indicates error
-                  // Format result nicely - check if it's an error string
-                  if (typeof result === 'string' && result.startsWith('❌')) {
-                      testResultDiv.className = 'error';
-                      testResultDiv.textContent = result;
-                  } else if (Array.isArray(result)) {
-                      // Handle array results (like FIND_SIMILAR, SEARCH)
-                      // Use innerHTML and <br> for line breaks in HTML
-                      testResultDiv.innerHTML = '<strong>Results:</strong><br>' + result.map(row => (row[0] || 'N/A')).join('<br>');
-                  }
-                  else {
-                      testResultDiv.textContent = 'Result: ' + result;
-                  }
-                  testButton.disabled = false;
-              })
-              .withFailureHandler(error => {
-                  console.error("Test Function Error:", error);
-                  testResultDiv.className = 'error';
-                  testResultDiv.textContent = `❌ Script Error: ${error.message || error}`;
-                  testButton.disabled = false;
-              })
-              .testExaFunction(selectedFunction, args); // Call the backend function
-      }
 
       // --- Batch Operations Logic ---
       function performBatchOperation(operation) {
         const batchStatusDiv = document.getElementById('batchStatus');
         
-        // Disable buttons during operation
+        // Disable button during operation
         document.getElementById('refreshSelected').disabled = true;
-        document.getElementById('clearSelected').disabled = true;
         
         // Update status
-        batchStatusDiv.className = '';
         batchStatusDiv.textContent = 'Processing...';
         
         google.script.run
           .withSuccessHandler(result => {
             if (result.success) {
-              batchStatusDiv.className = 'success';
-              batchStatusDiv.textContent = `✅ ${result.message}`;
+              batchStatusDiv.textContent = `${result.message}`;
             } else {
-              batchStatusDiv.className = 'error';
-              batchStatusDiv.textContent = `❌ ${result.message}`;
+              batchStatusDiv.textContent = `${result.message}`;
             }
             
-            // Re-enable buttons
+            // Re-enable button
             document.getElementById('refreshSelected').disabled = false;
-            document.getElementById('clearSelected').disabled = false;
           })
           .withFailureHandler(error => {
-            batchStatusDiv.className = 'error';
-            batchStatusDiv.textContent = `❌ Error: ${error.message || error}`;
+            batchStatusDiv.textContent = `Error: ${error.message || error}`;
             
-            // Re-enable buttons
+            // Re-enable button
             document.getElementById('refreshSelected').disabled = false;
-            document.getElementById('clearSelected').disabled = false;
           })
           .processBatchOperation(operation);
       }
