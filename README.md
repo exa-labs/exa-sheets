@@ -133,3 +133,25 @@ To use batch operations:
 * Your Exa API key is stored securely using Google Apps Script's User Properties service
 * The key is only accessible to your Google account
 * No data is stored outside of your Google account and the Exa API
+
+## Development
+
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+2. Login to Google:
+   ```bash
+   npm run login
+   ```
+
+3. Create a new Google Apps Script project:
+   ```bash
+   npm run create
+   ```
+
+4. Push the code:
+   ```bash
+   npm run push
+   ```
