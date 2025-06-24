@@ -2,10 +2,9 @@
 <html>
   <head>
     <base target="_top">
-    <link href="https://fonts.googleapis.com/css2?family=Bitter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
       body {
-        font-family: Verdana, Geneva, sans-serif;
+        font-family: sans-serif;
         padding: 0; /* Remove body padding, handle spacing inside containers */
         color: #111827; /* Exa text color */
         margin: 0;
@@ -15,9 +14,6 @@
         flex-direction: column; /* Stack tabs and content vertically */
       }
 
-      h3, h4, .tab-button, .doc-section h4 {
-        font-family: 'Bitter', serif;
-      }
 
       .tab-container {
         display: flex;
@@ -71,7 +67,7 @@
         background-color: #FFFFFF; /* White background for input */
         color: #111827; /* Exa text color */
         font-size: 0.9em; /* Consistent font size */
-        font-family: Verdana, Geneva, sans-serif;
+        font-family: sans-serif;
       }
        input[type="password"]:focus, select:focus, input[type="text"]:focus, input[type="number"]:focus {
         border-color: #1F40ED; /* Exa accent on focus */
@@ -89,7 +85,7 @@
         transition: background-color 0.2s ease; /* Smooth hover effect */
         font-size: 0.9em; /* Consistent font size */
         margin-top: 5px; /* Space above buttons */
-        font-family: Verdana, Geneva, sans-serif;
+        font-family: sans-serif;
         letter-spacing: 0.3px; /* Slightly improve button text readability */
       }
       
@@ -118,7 +114,7 @@
         border-radius: 4px;
         border: 1px solid #E5E7EB;
         word-wrap: break-word; /* Wrap long results */
-        font-family: Verdana, Geneva, sans-serif;
+        font-family: sans-serif;
       }
       .error {
         color: #B91C1C; /* Darker red for errors */
@@ -144,13 +140,12 @@
          margin: 0 0 8px 0;
          font-weight: 600;
          color: #1F40ED; /* Accent color for function names */
-         font-family: 'Bitter', serif;
        }
        .doc-section p {
          margin: 0 0 5px 0;
          font-size: 0.85em;
          line-height: 1.4;
-         font-family: Verdana, Geneva, sans-serif;
+         font-family: sans-serif;
        }
         .doc-section code {
           background-color: #E5E7EB;
@@ -180,7 +175,7 @@
         font-size: 0.9em;
         min-height: 1.2em;
         word-wrap: break-word;
-        font-family: Verdana, Geneva, sans-serif;
+        font-family: sans-serif;
       }
 
       /* API Key Management Styles */
@@ -351,6 +346,11 @@
       
       <div id="apiKeyStatus" class="status-display">
         <span id="apiKeyStatusText">No API key set. Add a key to get started.</span>
+      </div>
+      
+      <div style="margin-top: 20px; padding: 15px; background-color: #F3F4F6; border-radius: 6px; font-size: 0.85em;">
+        <p style="margin: 0; color: #4B5563;">Need an API key? Get one from your Exa dashboard:</p>
+        <a href="https://dashboard.exa.ai/api-keys" target="_blank" style="color: #1F40ED; text-decoration: none; font-weight: 500;">https://dashboard.exa.ai/api-keys</a>
       </div>
     </div>
 

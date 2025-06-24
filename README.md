@@ -1,8 +1,8 @@
-# Exa for Google Sheets
+# Exa Google Sheets Extension
 
 ## Description
 
-This Google Apps Script integration brings the power of Exa API directly into Google Sheets, allowing you to search the web, query information, find similar content, and extract website content without leaving your spreadsheet.
+This Google Apps Script integration brings the power of the Exa API directly into Google Sheets, allowing you to search the web, query information, find similar content, and extract website content without leaving your spreadsheet.
 
 ## Features
 
@@ -12,11 +12,10 @@ This Google Apps Script integration brings the power of Exa API directly into Go
 * **EXA_CONTENTS:** Extract the text content from specific URLs
 * **EXA_FINDSIMILAR:** Find URLs similar to a provided reference URL
 
-### Enhanced Sidebar Interface
+### Sidebar Interface
 * **API Key Management:** Securely save your Exa API key
 * **Documentation:** Built-in reference for all Exa functions and their parameters
-* **Function Builder:** Interactive interface to build and test Exa functions
-* **Batch Operations:** Refresh or clear multiple Exa function cells at once
+* **Batch Refresh:** Refresh multiple Exa function cells at once
 
 ## Setup & Installation
 
@@ -35,30 +34,24 @@ This Google Apps Script integration brings the power of Exa API directly into Go
     *   Once authorized, the sidebar will open with the API Key tab active.
     *   Go to [https://exa.ai/](https://exa.ai/) to get your API key if you don't have one.
     *   Paste your Exa API key into the input field in the sidebar and click "Save API Key".
-    *   You should see a success message "✅ API Key saved!".
+    *   You should see a success message "API key saved successfully.".
 
 ## Using the Sidebar
 
-The sidebar offers four main tabs:
+The sidebar offers three main tabs:
 
 ### 1. API Key
 * Set or update your Exa API key
 * View status of key operations
 
-### 2. Documentation
+### 2. Batch
+* Refresh selected cells containing Exa functions
+* Status updates for refresh operations
+
+### 3. Documentation
 * Comprehensive documentation for all Exa functions
 * Parameter descriptions and return value information
 * Quick reference for function syntax
-
-### 3. Function Builder
-* Interactive interface to construct Exa functions
-* Test functions before adding them to your sheet
-* View results directly in the sidebar
-
-### 4. Batch Operations
-* Refresh selected cells containing Exa functions
-* Clear results from selected Exa function cells
-* Status updates for batch operations
 
 ## Using Exa Functions
 
@@ -82,7 +75,7 @@ Searches the web and returns a vertical list of URLs.
 
 **Parameters:**
 * `query` (required): The search query
-* `numResults` (optional): Number of results to return (1-10, Default: 5)
+* `numResults` (optional): Number of results to return (1-10, Default: 1)
 * `searchType` (optional): "auto", "neural", or "keyword" (Default: "auto")
 * `prefix` (optional): Text to add before the main query
 * `suffix` (optional): Text to add after the main query
@@ -104,21 +97,19 @@ Finds URLs similar to the input URL.
 
 **Parameters:**
 * `url` (required): The reference URL to find similar content
-* `numResults` (optional): Number of results to return (1-10, Default: 5)
+* `numResults` (optional): Number of results to return (1-10, Default: 1)
 * `includeDomainsStr` (optional): Comma-separated list of domains to include
 * `excludeDomainsStr` (optional): Comma-separated list of domains to exclude
 * `includeTextStr` (optional): Phrase that must appear in results
 * `excludeTextStr` (optional): Phrase that must not appear in results
 
-## Batch Operations
+## Batch Refresh
 
-To use batch operations:
+To use batch refresh:
 
 1. Select cells containing Exa functions in your sheet
 2. Open the sidebar and navigate to the "Batch" tab
-3. Choose an operation:
-   * **Refresh Selected Cells:** Re-executes the Exa functions in selected cells
-   * **Clear Selected Results:** Clears the results while preserving the formulas
+3. Click **Refresh Selected Cells** to re-execute the Exa functions in selected cells
 
 ## Notes
 
