@@ -323,14 +323,14 @@ function EXA_ANSWER(prompt, prefix, suffix, includeCitations) {
             finalOutput = fullAnswerFromApi.substring(0, citationStartIndex).trim();
           } else {
             // If the pattern isn't found, assume no inline citations; use the full answer
-            finalOutput = fullAnswerFromApi;
+            finalOutput = fullAnswerFromApi.trim();
           }
           // Now finalOutput contains only the core answer part (hopefully)
 
         } else {
           // --- Include Citations Behavior ---
           // Use the full answer from API, and append from the citations array if present
-           finalOutput = fullAnswerFromApi; // Start with the full API answer
+           finalOutput = fullAnswerFromApi.trim(); // Start with the full API answer
 
            if (result.citations && Array.isArray(result.citations) && result.citations.length > 0) {
               const formattedCitations = result.citations.map(citation => {
@@ -349,7 +349,7 @@ function EXA_ANSWER(prompt, prefix, suffix, includeCitations) {
            // If includeCitations is true but no citations array, finalOutput remains the fullAnswerFromApi
         }
 
-        return finalOutput; // Return the processed output
+        return finalOutput.trim(); // Return the processed output
 
       } else {
         return "API returned a valid response, but no 'answer' field (string) was found.";
@@ -406,7 +406,7 @@ function EXA_CONTENTS(url) {
         const contentData = result.results && result.results[0];
         if (contentData) {
             // Prioritize text content based on Exa's common response structure
-            return contentData.text || contentData.highlights || "No relevant content found in response.";
+            return (contentData.text || contentData.highlights || "No relevant content found in response.").trim();
         } else {
             return "API returned successfully, but no content data found for this URL.";
         }
