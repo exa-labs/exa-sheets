@@ -612,17 +612,15 @@ function EXA_SEARCH(query, numResults, searchType, prefix, suffix) {
 }
 
 /**
- * Processes batch operations on selected cells containing Exa functions.
- * Supported operations: refresh (recalculate cells), clear (clear values)
+ * Refreshes all selected cells containing Exa functions by forcing recalculation.
+ * Processes all cells in parallel for optimal performance.
  * 
- * @param {string} operation The operation to perform ('refresh' or 'clear')
+ * @param {string} operation The operation to perform (always 'refresh')
  * @return {Object} Result object with success flag and message
  */
 function processBatchOperation(operation) {
   try {
-    // Get active spreadsheet and current selection
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
-    const selection = ss.getActiveSheet().getActiveRange();
+    const selection = SpreadsheetApp.getActiveSheet().getActiveRange();
     
     if (!selection) {
       return { 
@@ -631,61 +629,46 @@ function processBatchOperation(operation) {
       };
     }
     
-    // Get formulas from the selection
+    // Get all formulas and filter for Exa functions
     const formulas = selection.getFormulas();
+    const exaCells = [];
     
-    // Track counts for reporting
-    let totalProcessed = 0;
-    let exaCellsAffected = 0;
-    
-    // Process each cell in the selection
-    for (let row = 0; row < formulas.length; row++) {
-      for (let col = 0; col < formulas[row].length; col++) {
-        const formula = formulas[row][col];
-        totalProcessed++;
-        
-        // Check if this is an Exa formula
+    formulas.forEach((row, rowIndex) => {
+      row.forEach((formula, colIndex) => {
         if (formula && formula.toUpperCase().match(/^=EXA_/)) {
-          const cell = selection.getCell(row + 1, col + 1);
-          
-          if (operation === 'refresh') {
-            // Store the formula, clear the cell, then reapply to force recalculation
-            const tempFormula = formula;
-            // First set to a temporary value (empty string) then back to the original formula
-            // This forces Google Sheets to recalculate the formula
-            cell.setFormula('');
-            SpreadsheetApp.flush();
-            cell.setFormula(tempFormula);
-            exaCellsAffected++;
-          } 
-          else if (operation === 'clear') {
-            // Just clear the content, leaving the formula
-            cell.clearContent();
-            exaCellsAffected++;
-          }
+          exaCells.push({
+            cell: selection.getCell(rowIndex + 1, colIndex + 1),
+            formula: formula
+          });
         }
-      }
+      });
+    });
+    
+    if (exaCells.length === 0) {
+      const totalCells = formulas.flat().length;
+      const cellText = totalCells === 1 ? 'cell' : 'cells';
+      return { 
+        success: false, 
+        message: `No Exa functions found in the ${totalCells} selected ${cellText}.`
+      };
     }
     
-    // Force recalculation when refreshing
-    if (operation === 'refresh' && exaCellsAffected > 0) {
-      SpreadsheetApp.flush();
-    }
+    // Clear all formulas at once
+    exaCells.forEach(item => item.cell.setFormula(''));
+    SpreadsheetApp.flush();
     
-    // Generate result message
-    let message;
-    if (exaCellsAffected === 0) {
-      const cellText = totalProcessed === 1 ? 'cell' : 'cells';
-      message = `No Exa functions found in the ${totalProcessed} selected ${cellText}.`;
-      return { success: false, message: message };
-    } else {
-      const cellText = exaCellsAffected === 1 ? 'cell' : 'cells';
-      message = `Successfully refreshed ${exaCellsAffected} ${cellText}.`;
-      return { success: true, message: message };
-    }
+    // Restore all formulas at once
+    exaCells.forEach(item => item.cell.setFormula(item.formula));
+    SpreadsheetApp.flush();
+    
+    const cellText = exaCells.length === 1 ? 'cell' : 'cells';
+    return { 
+      success: true, 
+      message: `Successfully refreshed ${exaCells.length} ${cellText}.`
+    };
     
   } catch (e) {
-    Logger.log(`Error in processBatchOperation (${operation}): ${e}`);
+    Logger.log(`Error in processBatchOperation: ${e}`);
     return { 
       success: false, 
       message: `Operation failed: ${e.message}`
