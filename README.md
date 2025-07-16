@@ -124,6 +124,7 @@ To use batch refresh:
 * Your Exa API key is stored securely using Google Apps Script's User Properties service
 * The key is only accessible to your Google account
 * No data is stored outside of your Google account and the Exa API
+* View our [Privacy Policy](https://exa.ai/exa-for-sheets/privacy-policy) for details on data handling and Google API compliance
 
 ## Development
 
